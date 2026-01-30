@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMBA Finance Lab</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: rgba(20, 20, 30, 0.8);
+            --bg-input: rgba(30, 30, 45, 0.9);
+            --michigan-maize: #FFCB05;
+            --michigan-blue: #00274C;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --border: rgba(255, 203, 5, 0.2);
+            --success: #00d97e;
+            --danger: #e63757;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Ambient background effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(255, 203, 5, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 39, 76, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--michigan-maize), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-section {
+            padding: 0 12px;
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: var(--glass);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(255, 203, 5, 0.15), rgba(255, 203, 5, 0.05));
+            color: var(--michigan-maize);
+            border-left: 3px solid var(--michigan-maize);
+        }
+
+        .nav-item .shortcut {
+            margin-left: auto;
+            font-size: 0.7rem;
+            background: var(--bg-input);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 32px 48px;
+            max-width: 1400px;
+        }
+
+        /* Section Headers */
+        .section {
+            margin-bottom: 48px;
+            scroll-margin-top: 32px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .section-header h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        .section-header .badge {
+            font-size: 0.7rem;
+            background: var(--michigan-blue);
+            color: var(--michigan-maize);
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            transition: all 0.2s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--michigan-maize);
+            box-shadow: 0 0 0 3px rgba(255, 203, 5, 0.1);
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .input-suffix {
+            position: relative;
+        }
+
+        .input-suffix input {
+            padding-right: 50px;
+        }
+
+        .input-suffix span {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Output Display */
+        .output-display {
+            background: linear-gradient(135deg, rgba(255, 203, 5, 0.1), rgba(0, 39, 76, 0.2));
+            border: 1px solid var(--michigan-maize);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .output-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .output-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            background: linear-gradient(135deg, var(--michigan-maize), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .output-value.positive {
+            background: linear-gradient(135deg, var(--success), #7fffd4);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .output-value.negative {
+            background: linear-gradient(135deg, var(--danger), #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .output-subtext {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            background: var(--bg-input);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px;
+            background: var(--bg-input);
+            border-bottom: 2px solid var(--michigan-maize);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table tr:hover {
+            background: var(--glass);
+        }
+
+        .data-table .highlight {
+            background: rgba(255, 203, 5, 0.1);
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--michigan-maize);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            background: #ffd633;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--michigan-maize);
+        }
+
+        /* Toggle */
+        .toggle-btn {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .toggle-btn:hover {
+            color: var(--michigan-maize);
+        }
+
+        /* Formula Display */
+        .formula-box {
+            background: var(--bg-input);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: var(--michigan-maize);
+            margin-top: 16px;
+            display: none;
+        }
+
+        .formula-box.visible {
+            display: block;
+        }
+
+        /* Sensitivity Table */
+        .sensitivity-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.8rem;
+        }
+
+        .sensitivity-table th, .sensitivity-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .sensitivity-table th {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+        }
+
+        .sensitivity-table .base-case {
+            background: rgba(255, 203, 5, 0.2);
+            font-weight: 700;
+            color: var(--michigan-maize);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 16px; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Number formatting helper */
+        .mono {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <span>Ross EMBA</span>
+                <h1>Finance Lab</h1>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Fundamentals</div>
+                <a href="#tvm" class="nav-item active">
+                    📊 Time Value of Money
+                    <span class="shortcut">1</span>
+                </a>
+                <a href="#breakeven" class="nav-item">
+                    📈 Break-even Analysis
+                    <span class="shortcut">2</span>
+                </a>
+                <a href="#wacc" class="nav-item">
+                    ⚖️ WACC Calculator
+                    <span class="shortcut">3</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Valuation</div>
+                <a href="#dcf" class="nav-item">
+                    💰 DCF Model
+                    <span class="shortcut">4</span>
+                </a>
+                <a href="#comps" class="nav-item">
+                    🔍 Comps Analysis
+                    <span class="shortcut">5</span>
+                </a>
+                <a href="#lbo" class="nav-item">
+                    🏦 LBO Model
+                    <span class="shortcut">6</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Financial Statements</div>
+                <a href="#three-statement" class="nav-item">
+                    📑 3-Statement Model
+                    <span class="shortcut">7</span>
+                </a>
+                <a href="#working-capital" class="nav-item">
+                    🔄 Working Capital
+                    <span class="shortcut">8</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- TVM Section -->
+            <section id="tvm" class="section">
+                <div class="section-header">
+                    <h2>Time Value of Money</h2>
+                    <span class="badge">Core Concept</span>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Present Value Calculator -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Present Value</h3>
+                            <button class="toggle-btn" onclick="toggleFormula('pv-formula')">Show Formula</button>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="input-group">
+                                <label>Future Value ($)</label>
+                                <input type="number" id="pv-fv" value="100000" oninput="calcPV()">
+                            </div>
+                            <div class="input-group">
+                                <label>Interest Rate (%)</label>
+                                <input type="number" id="pv-rate" value="8" step="0.1" oninput="calcPV()">
+                            </div>
+                            <div class="input-group">
+                                <label>Periods (Years)</label>
+                                <input type="number" id="pv-periods" value="10" oninput="calcPV()">
+                            </div>
+                            <div class="input-group">
+                                <label>Compounding</label>
+                                <select id="pv-compound" onchange="calcPV()">
+                                    <option value="1">Annual</option>
+                                    <option value="2">Semi-Annual</option>
+                                    <option value="4">Quarterly</option>
+                                    <option value="12">Monthly</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="output-display">
+                            <div class="output-label">Present Value</div>
+                            <div class="output-value" id="pv-result">$46,319.35</div>
+                            <div class="output-subtext" id="pv-discount">Discount: $53,680.65</div>
+                        </div>
+
+                        <div class="formula-box" id="pv-formula">
+                            PV = FV / (1 + r/n)^(n×t)<br>
+                            Where: r = rate, n = compounds/year, t = years
+                        </div>
+                    </div>
+
+                    <!-- Future Value Calculator -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Future Value</h3>
+                            <button class="toggle-btn" onclick="toggleFormula('fv-formula')">Show Formula</button>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="input-group">
+                                <label>Present Value ($)</label>
+                                <input type="number" id="fv-pv" value="50000" oninput="calcFV()">
+                            </div>
+                            <div class="input-group">
+                                <label>Interest Rate (%)</label>
+                                <input type="number" id="fv-rate" value="7" step="0.1" oninput="calcFV()">
+                            </div>
+                            <div class="input-group">
+                                <label>Periods (Years)</label>
+                                <input type="number" id="fv-periods" value="20" oninput="calcFV()">
+                            </div>
+                            <div class="input-group">
+                                <label>Compounding</label>
+                                <select id="fv-compound" onchange="calcFV()">
+                                    <option value="1">Annual</option>
+                                    <option value="2">Semi-Annual</option>
+                                    <option value="4">Quarterly</option>
+                                    <option value="12">Monthly</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="output-display">
+                            <div class="output-label">Future Value</div>
+                            <div class="output-value" id="fv-result">$193,484.21</div>
+                            <div class="output-subtext" id="fv-growth">Growth: $143,484.21</div>
+                        </div>
+
+                        <div class="formula-box" id="fv-formula">
+                            FV = PV × (1 + r/n)^(n×t)<br>
+                            Where: r = rate, n = compounds/year, t = years
+                        </div>
+                    </div>
+
+                    <!-- Annuity PV Calculator -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Annuity Present Value</h3>
+                            <button class="toggle-btn" onclick="toggleFormula('annuity-pv-formula')">Show Formula</button>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="input-group">
+                                <label>Payment Amount ($)</label>
+                                <input type="number" id="ann-pv-pmt" value="10000" oninput="calcAnnuityPV()">
+                            </div>
+                            <div class="input-group">
+                                <label>Interest Rate (%)</label>
+                                <input type="number" id="ann-pv-rate" value="6" step="0.1" oninput="calcAnnuityPV()">
+                            </div>
+                            <div class="input-group">
+                                <label>Number of Payments</label>
+                                <input type="number" id="ann-pv-n" value="20" oninput="calcAnnuityPV()">
+                            </div>
+                            <div class="input-group">
+                                <label>Type</label>
+                                <select id="ann-pv-type" onchange="calcAnnuityPV()">
+                                    <option value="ordinary">Ordinary (End)</option>
+                                    <option value="due">Annuity Due (Begin)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="output-display">
+                            <div class="output-label">Present Value of Annuity</div>
+                            <div class="output-value" id="ann-pv-result">$114,699.21</div>
+                            <div class="output-subtext" id="ann-pv-total">Total Payments: $200,000.00</div>
+                        </div>
+
+                        <div class="formula-box" id="annuity-pv-formula">
+                            PV = PMT × [(1 - (1+r)^-n) / r]<br>
+                            Annuity Due: PV × (1+r)
+                        </div>
+                    </div>
+
+                    <!-- Loan Payment Calculator -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Loan Payment</h3>
+                            <button class="toggle-btn" onclick="toggleFormula('loan-formula')">Show Formula</button>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="input-group">
+                                <label>Loan Amount ($)</label>
+                                <input type="number" id="loan-principal" value="300000" oninput="calcLoan()">
+                            </div>
+                            <div class="input-group">
+                                <label>Annual Rate (%)</label>
+                                <input type="number" id="loan-rate" value="6.5" step="0.125" oninput="calcLoan()">
+                            </div>
+                            <div class="input-group">
+                                <label>Term (Years)</label>
+                                <input type="number" id="loan-years" value="30" oninput="calcLoan()">
+                            </div>
+                            <div class="input-group">
+                                <label>Payments/Year</label>
+                                <select id="loan-freq" onchange="calcLoan()">
+                                    <option value="12">Monthly</option>
+                                    <option value="26">Bi-Weekly</option>
+                                    <option value="52">Weekly</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="output-display">
+                            <div class="output-label">Payment Amount</div>
+                            <div class="output-value" id="loan-payment">$1,896.20</div>
+                            <div class="output-subtext" id="loan-total">Total Interest: $382,633.47</div>
+                        </div>
+
+                        <div class="formula-box" id="loan-formula">
+                            PMT = P × [r(1+r)^n] / [(1+r)^n - 1]<br>
+                            Where: P = principal, r = periodic rate, n = total payments
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Break-even Section -->
+            <section id="breakeven" class="section">
+                <div class="section-header">
+                    <h2>Break-even Analysis</h2>
+                    <span class="badge">Profitability</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Break-even Calculator</h3>
+                        <button class="toggle-btn" onclick="toggleFormula('be-formula')">Show Formula</button>
+                    </div>
+
+                    <div class="grid-4">
+                        <div class="input-group">
+                            <label>Selling Price ($)</label>
+                            <input type="number" id="be-price" value="50" oninput="calcBreakeven()">
+                        </div>
+                        <div class="input-group">
+                            <label>Variable Cost ($)</label>
+                            <input type="number" id="be-vc" value="30" oninput="calcBreakeven()">
+                        </div>
+                        <div class="input-group">
+                            <label>Fixed Costs ($)</label>
+                            <input type="number" id="be-fc" value="100000" oninput="calcBreakeven()">
+                        </div>
+                        <div class="input-group">
+                            <label>Target Profit ($)</label>
+                            <input type="number" id="be-target" value="50000" oninput="calcBreakeven()">
+                        </div>
+                    </div>
+
+                    <div class="grid-4" style="margin-top: 20px;">
+                        <div class="output-display">
+                            <div class="output-label">Contribution Margin</div>
+                            <div class="output-value" id="be-cm">$20.00</div>
+                            <div class="output-subtext" id="be-cm-pct">40.0% of price</div>
+                        </div>
+                        <div class="output-display">
+                            <div class="output-label">Break-even Units</div>
+                            <div class="output-value" id="be-units">5,000</div>
+                            <div class="output-subtext">units to break even</div>
+                        </div>
+                        <div class="output-display">
+                            <div class="output-label">Break-even Revenue</div>
+                            <div class="output-value" id="be-revenue">$250,000</div>
+                            <div class="output-subtext">sales to break even</div>
+                        </div>
+                        <div class="output-display">
+                            <div class="output-label">Units for Target</div>
+                            <div class="output-value" id="be-target-units">7,500</div>
+                            <div class="output-subtext">units for target profit</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="breakeven-chart"></canvas>
+                    </div>
+
+                    <div class="formula-box" id="be-formula">
+                        CM = Price - Variable Cost<br>
+                        BEP (units) = Fixed Costs / CM<br>
+                        BEP ($) = Fixed Costs / CM Ratio<br>
+                        Target Units = (FC + Target Profit) / CM
+                    </div>
+                </div>
+            </section>
+
+            <!-- WACC Section -->
+            <section id="wacc" class="section">
+                <div class="section-header">
+                    <h2>WACC Calculator</h2>
+                    <span class="badge">Cost of Capital</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Weighted Average Cost of Capital</h3>
+                        <button class="toggle-btn" onclick="toggleFormula('wacc-formula')">Show Formula</button>
+                    </div>
+
+                    <div class="grid-2">
+                        <div>
+                            <h4 style="margin-bottom: 16px; color: var(--text-secondary);">Cost of Equity (CAPM)</h4>
+                            <div class="grid-2">
+                                <div class="input-group">
+                                    <label>Risk-Free Rate (%)</label>
+                                    <input type="number" id="wacc-rf" value="4.5" step="0.1" oninput="calcWACC()">
+                                </div>
+                                <div class="input-group">
+                                    <label>Market Return (%)</label>
+                                    <input type="number" id="wacc-rm" value="10" step="0.1" oninput="calcWACC()">
+                                </div>
+                                <div class="input-group">
+                                    <label>Beta</label>
+                                    <input type="number" id="wacc-beta" value="1.2" step="0.05" oninput="calcWACC()">
+                                </div>
+                                <div class="input-group">
+                                    <label>Equity Weight (%)</label>
+                                    <input type="number" id="wacc-we" value="60" oninput="calcWACC()">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 16px; color: var(--text-secondary);">Cost of Debt</h4>
+                            <div class="grid-2">
+                                <div class="input-group">
+                                    <label>Pre-Tax Cost of Debt (%)</label>
+                                    <input type="number" id="wacc-rd" value="6" step="0.1" oninput="calcWACC()">
+                                </div>
+                                <div class="input-group">
+                                    <label>Tax Rate (%)</label>
+                                    <input type="number" id="wacc-tax" value="25" oninput="calcWACC()">
+                                </div>
+                                <div class="input-group">
+                                    <label>Debt Weight (%)</label>
+                                    <input type="number" id="wacc-wd" value="40" oninput="calcWACC()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-3" style="margin-top: 24px;">
+                        <div class="metric-card">
+                            <div class="metric-label">Cost of Equity</div>
+                            <div class="metric-value" id="wacc-ke">11.10%</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">After-Tax Cost of Debt</div>
+                            <div class="metric-value" id="wacc-kd">4.50%</div>
+                        </div>
+                        <div class="output-display">
+                            <div class="output-label">WACC</div>
+                            <div class="output-value" id="wacc-result">8.46%</div>
+                        </div>
+                    </div>
+
+                    <div class="formula-box" id="wacc-formula">
+                        Ke = Rf + β(Rm - Rf)  [CAPM]<br>
+                        Kd = Rd × (1 - Tax Rate)  [After-tax cost of debt]<br>
+                        WACC = (We × Ke) + (Wd × Kd)
+                    </div>
+                </div>
+            </section>
+
+            <!-- DCF Section -->
+            <section id="dcf" class="section">
+                <div class="section-header">
+                    <h2>DCF Valuation</h2>
+                    <span class="badge">Intrinsic Value</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Discounted Cash Flow Model</h3>
+                        <button class="toggle-btn" onclick="toggleFormula('dcf-formula')">Show Formula</button>
+                    </div>
+
+                    <div class="grid-4">
+                        <div class="input-group">
+                            <label>Base Revenue ($M)</label>
+                            <input type="number" id="dcf-revenue" value="100" oninput="calcDCF()">
+                        </div>
+                        <div class="input-group">
+                            <label>Revenue Growth (%)</label>
+                            <input type="number" id="dcf-growth" value="10" step="0.5" oninput="calcDCF()">
+                        </div>
+                        <div class="input-group">
+                            <label>EBITDA Margin (%)</label>
+                            <input type="number" id="dcf-ebitda-margin" value="20" step="0.5" oninput="calcDCF()">
+                        </div>
+                        <div class="input-group">
+                            <label>D&A (% Rev)</label>
+                            <input type="number" id="dcf-da" value="3" step="0.5" oninput="calcDCF()">
+                        </div>
+                        <div class="input-group">
+                            <label>CapEx (% Rev)</label>
+                            <input type="number" id="dcf-capex" value="4" step="0.5" oninput="calcDCF()">
+                        </div>
+                        <div class="input-group">
+                            <label>NWC (% Rev)</label>
+                            <input type="number" id="dcf-nwc" value="10" step="0.5" oninput="calcDCF()">
+                        </div>
+                        <div class="input-group">
+                            <label>Tax Rate (%)</label>
+                            <input type="number" id="dcf-tax" value="25" oninput="calcDCF()">
+                        </div>
+                        <div class="input-group">
+                            <label>WACC (%)</label>
+                            <input type="number" id="dcf-wacc" value="10" step="0.25" oninput="calcDCF()">
+                        </div>
+                        <div class="input-group">
+                            <label>Terminal Growth (%)</label>
+                            <input type="number" id="dcf-tg" value="2.5" step="0.25" oninput="calcDCF()">
+                        </div>
+                        <div class="input-group">
+                            <label>Projection Years</label>
+                            <input type="number" id="dcf-years" value="5" min="3" max="10" oninput="calcDCF()">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 24px;">
+                        <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Projected Free Cash Flows ($M)</h4>
+                        <div class="table-container" style="overflow-x: auto;">
+                            <table class="data-table" id="dcf-fcf-table">
+                                <thead>
+                                    <tr id="dcf-header-row"></tr>
+                                </thead>
+                                <tbody id="dcf-fcf-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="grid-3" style="margin-top: 24px;">
+                        <div class="metric-card">
+                            <div class="metric-label">PV of FCFs</div>
+                            <div class="metric-value" id="dcf-pv-fcf">$54.2M</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">PV of Terminal Value</div>
+                            <div class="metric-value" id="dcf-pv-tv">$136.8M</div>
+                        </div>
+                        <div class="output-display">
+                            <div class="output-label">Enterprise Value</div>
+                            <div class="output-value" id="dcf-ev">$191.0M</div>
+                            <div class="output-subtext" id="dcf-ev-multiple">1.9x Revenue</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 24px;">
+                        <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Sensitivity Analysis: EV to WACC & Terminal Growth</h4>
+                        <div id="dcf-sensitivity-container"></div>
+                    </div>
+
+                    <div class="formula-box" id="dcf-formula">
+                        FCF = EBITDA - D&A × Tax - CapEx - ΔNWC + D&A<br>
+                        FCF = NOPAT + D&A - CapEx - ΔNWC<br>
+                        Terminal Value = FCF_n × (1+g) / (WACC - g)<br>
+                        EV = Σ[FCF_t / (1+WACC)^t] + TV / (1+WACC)^n
+                    </div>
+                </div>
+            </section>
+
+            <!-- Comps Section -->
+            <section id="comps" class="section">
+                <div class="section-header">
+                    <h2>Comparable Company Analysis</h2>
+                    <span class="badge">Relative Value</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Trading Comparables</h3>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="comps-table">
+                            <thead>
+                                <tr>
+                                    <th>Company</th>
+                                    <th>Price</th>
+                                    <th>Shares (M)</th>
+                                    <th>Market Cap</th>
+                                    <th>Debt</th>
+                                    <th>Cash</th>
+                                    <th>EV</th>
+                                    <th>Revenue</th>
+                                    <th>EBITDA</th>
+                                    <th>EV/Rev</th>
+                                    <th>EV/EBITDA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comps-body">
+                                <tr>
+                                    <td><input type="text" value="Company A" class="comp-name" style="background:transparent;border:none;color:var(--text-primary);width:100px;"></td>
+                                    <td><input type="number" value="45" class="comp-price" oninput="calcComps()" style="width:60px;"></td>
+                                    <td><input type="number" value="100" class="comp-shares" oninput="calcComps()" style="width:60px;"></td>
+                                    <td class="comp-mcap">$4,500</td>
+                                    <td><input type="number" value="500" class="comp-debt" oninput="calcComps()" style="width:60px;"></td>
+                                    <td><input type="number" value="150" class="comp-cash" oninput="calcComps()" style="width:60px;"></td>
+                                    <td class="comp-ev">$4,850</td>
+                                    <td><input type="number" value="1200" class="comp-revenue" oninput="calcComps()" style="width:70px;"></td>
+                                    <td><input type="number" value="240" class="comp-ebitda" oninput="calcComps()" style="width:60px;"></td>
+                                    <td class="comp-ev-rev">4.0x</td>
+                                    <td class="comp-ev-ebitda">20.2x</td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" value="Company B" class="comp-name" style="background:transparent;border:none;color:var(--text-primary);width:100px;"></td>
+                                    <td><input type="number" value="32" class="comp-price" oninput="calcComps()" style="width:60px;"></td>
+                                    <td><input type="number" value="150" class="comp-shares" oninput="calcComps()" style="width:60px;"></td>
+                                    <td class="comp-mcap">$4,800</td>
+                                    <td><input type="number" value="400" class="comp-debt" oninput="calcComps()" style="width:60px;"></td>
+                                    <td><input type="number" value="100" class="comp-cash" oninput="calcComps()" style="width:60px;"></td>
+                                    <td class="comp-ev">$5,100</td>
+                                    <td><input type="number" value="1500" class="comp-revenue" oninput="calcComps()" style="width:70px;"></td>
+                                    <td><input type="number" value="280" class="comp-ebitda" oninput="calcComps()" style="width:60px;"></td>
+                                    <td class="comp-ev-rev">3.4x</td>
+                                    <td class="comp-ev-ebitda">18.2x</td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" value="Company C" class="comp-name" style="background:transparent;border:none;color:var(--text-primary);width:100px;"></td>
+                                    <td><input type="number" value="78" class="comp-price" oninput="calcComps()" style="width:60px;"></td>
+                                    <td><input type="number" value="50" class="comp-shares" oninput="calcComps()" style="width:60px;"></td>
+                                    <td class="comp-mcap">$3,900</td>
+                                    <td><input type="number" value="200" class="comp-debt" oninput="calcComps()" style="width:60px;"></td>
+                                    <td><input type="number" value="300" class="comp-cash" oninput="calcComps()" style="width:60px;"></td>
+                                    <td class="comp-ev">$3,800</td>
+                                    <td><input type="number" value="800" class="comp-revenue" oninput="calcComps()" style="width:70px;"></td>
+                                    <td><input type="number" value="200" class="comp-ebitda" oninput="calcComps()" style="width:60px;"></td>
+                                    <td class="comp-ev-rev">4.8x</td>
+                                    <td class="comp-ev-ebitda">19.0x</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="highlight">
+                                    <td><strong>Median</strong></td>
+                                    <td colspan="5"></td>
+                                    <td id="comps-median-ev">$4,850</td>
+                                    <td colspan="2"></td>
+                                    <td id="comps-median-ev-rev">4.0x</td>
+                                    <td id="comps-median-ev-ebitda">19.0x</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);">
+                        <h4 style="margin-bottom: 16px; color: var(--text-secondary);">Target Company Implied Valuation</h4>
+                        <div class="grid-4">
+                            <div class="input-group">
+                                <label>Target Revenue ($M)</label>
+                                <input type="number" id="target-revenue" value="1000" oninput="calcComps()">
+                            </div>
+                            <div class="input-group">
+                                <label>Target EBITDA ($M)</label>
+                                <input type="number" id="target-ebitda" value="200" oninput="calcComps()">
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Implied EV (Revenue)</div>
+                                <div class="metric-value" id="target-ev-rev">$4,000M</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Implied EV (EBITDA)</div>
+                                <div class="metric-value" id="target-ev-ebitda">$3,800M</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LBO Section -->
+            <section id="lbo" class="section">
+                <div class="section-header">
+                    <h2>LBO Model</h2>
+                    <span class="badge">Private Equity</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Leveraged Buyout Returns</h3>
+                        <button class="toggle-btn" onclick="toggleFormula('lbo-formula')">Show Formula</button>
+                    </div>
+
+                    <div class="grid-2">
+                        <div>
+                            <h4 style="margin-bottom: 16px; color: var(--text-secondary);">Entry Assumptions</h4>
+                            <div class="grid-2">
+                                <div class="input-group">
+                                    <label>EBITDA at Entry ($M)</label>
+                                    <input type="number" id="lbo-ebitda" value="50" oninput="calcLBO()">
+                                </div>
+                                <div class="input-group">
+                                    <label>Entry Multiple (x)</label>
+                                    <input type="number" id="lbo-entry-mult" value="8" step="0.5" oninput="calcLBO()">
+                                </div>
+                                <div class="input-group">
+                                    <label>Debt / EBITDA (x)</label>
+                                    <input type="number" id="lbo-leverage" value="5" step="0.25" oninput="calcLBO()">
+                                </div>
+                                <div class="input-group">
+                                    <label>Interest Rate (%)</label>
+                                    <input type="number" id="lbo-rate" value="8" step="0.25" oninput="calcLBO()">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 16px; color: var(--text-secondary);">Operating & Exit</h4>
+                            <div class="grid-2">
+                                <div class="input-group">
+                                    <label>EBITDA Growth (%/yr)</label>
+                                    <input type="number" id="lbo-growth" value="5" step="0.5" oninput="calcLBO()">
+                                </div>
+                                <div class="input-group">
+                                    <label>Holding Period (yrs)</label>
+                                    <input type="number" id="lbo-years" value="5" min="3" max="7" oninput="calcLBO()">
+                                </div>
+                                <div class="input-group">
+                                    <label>Exit Multiple (x)</label>
+                                    <input type="number" id="lbo-exit-mult" value="8" step="0.5" oninput="calcLBO()">
+                                </div>
+                                <div class="input-group">
+                                    <label>FCF Conversion (%)</label>
+                                    <input type="number" id="lbo-fcf" value="40" oninput="calcLBO()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-4" style="margin-top: 24px;">
+                        <div class="metric-card">
+                            <div class="metric-label">Entry EV</div>
+                            <div class="metric-value" id="lbo-entry-ev">$400M</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Initial Equity</div>
+                            <div class="metric-value" id="lbo-equity">$150M</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Exit EV</div>
+                            <div class="metric-value" id="lbo-exit-ev">$510M</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Exit Equity</div>
+                            <div class="metric-value" id="lbo-exit-equity">$360M</div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-top: 24px;">
+                        <div class="output-display">
+                            <div class="output-label">IRR</div>
+                            <div class="output-value" id="lbo-irr">19.1%</div>
+                            <div class="output-subtext">Internal Rate of Return</div>
+                        </div>
+                        <div class="output-display">
+                            <div class="output-label">MoM</div>
+                            <div class="output-value" id="lbo-mom">2.4x</div>
+                            <div class="output-subtext">Multiple on Money</div>
+                        </div>
+                    </div>
+
+                    <div class="formula-box" id="lbo-formula">
+                        Entry EV = EBITDA × Entry Multiple<br>
+                        Entry Debt = EBITDA × Leverage Multiple<br>
+                        Entry Equity = Entry EV - Entry Debt<br>
+                        Exit EV = Exit EBITDA × Exit Multiple<br>
+                        Exit Equity = Exit EV - Remaining Debt<br>
+                        MoM = Exit Equity / Entry Equity<br>
+                        IRR = (MoM)^(1/n) - 1
+                    </div>
+                </div>
+            </section>
+
+            <!-- Three Statement Section -->
+            <section id="three-statement" class="section">
+                <div class="section-header">
+                    <h2>Three-Statement Model</h2>
+                    <span class="badge">Financial Statements</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Linked Financial Statements</h3>
+                    </div>
+
+                    <div class="grid-4" style="margin-bottom: 24px;">
+                        <div class="input-group">
+                            <label>Base Revenue ($M)</label>
+                            <input type="number" id="ts-revenue" value="100" oninput="calcThreeStatement()">
+                        </div>
+                        <div class="input-group">
+                            <label>Revenue Growth (%)</label>
+                            <input type="number" id="ts-growth" value="8" step="0.5" oninput="calcThreeStatement()">
+                        </div>
+                        <div class="input-group">
+                            <label>Gross Margin (%)</label>
+                            <input type="number" id="ts-gm" value="40" oninput="calcThreeStatement()">
+                        </div>
+                        <div class="input-group">
+                            <label>SG&A (% Rev)</label>
+                            <input type="number" id="ts-sga" value="20" oninput="calcThreeStatement()">
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="ts-is-table">
+                            <thead>
+                                <tr>
+                                    <th>Income Statement</th>
+                                    <th>Year 1</th>
+                                    <th>Year 2</th>
+                                    <th>Year 3</th>
+                                    <th>Year 4</th>
+                                    <th>Year 5</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ts-is-body"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="grid-3" style="margin-top: 24px;">
+                        <div class="metric-card">
+                            <div class="metric-label">Yr 5 Revenue</div>
+                            <div class="metric-value" id="ts-yr5-rev">$136.0M</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Yr 5 Net Income</div>
+                            <div class="metric-value" id="ts-yr5-ni">$16.3M</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Yr 5 Net Margin</div>
+                            <div class="metric-value" id="ts-yr5-margin">12.0%</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Working Capital Section -->
+            <section id="working-capital" class="section">
+                <div class="section-header">
+                    <h2>Working Capital & Cash Conversion</h2>
+                    <span class="badge">Liquidity</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Cash Conversion Cycle</h3>
+                        <button class="toggle-btn" onclick="toggleFormula('wc-formula')">Show Formula</button>
+                    </div>
+
+                    <div class="grid-4">
+                        <div class="input-group">
+                            <label>Annual Revenue ($M)</label>
+                            <input type="number" id="wc-revenue" value="500" oninput="calcWorkingCapital()">
+                        </div>
+                        <div class="input-group">
+                            <label>Annual COGS ($M)</label>
+                            <input type="number" id="wc-cogs" value="300" oninput="calcWorkingCapital()">
+                        </div>
+                        <div class="input-group">
+                            <label>Accounts Receivable ($M)</label>
+                            <input type="number" id="wc-ar" value="60" oninput="calcWorkingCapital()">
+                        </div>
+                        <div class="input-group">
+                            <label>Inventory ($M)</label>
+                            <input type="number" id="wc-inv" value="45" oninput="calcWorkingCapital()">
+                        </div>
+                        <div class="input-group">
+                            <label>Accounts Payable ($M)</label>
+                            <input type="number" id="wc-ap" value="35" oninput="calcWorkingCapital()">
+                        </div>
+                    </div>
+
+                    <div class="grid-4" style="margin-top: 24px;">
+                        <div class="metric-card">
+                            <div class="metric-label">DSO</div>
+                            <div class="metric-value" id="wc-dso">43.8 days</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">DIO</div>
+                            <div class="metric-value" id="wc-dio">54.8 days</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">DPO</div>
+                            <div class="metric-value" id="wc-dpo">42.6 days</div>
+                        </div>
+                        <div class="output-display">
+                            <div class="output-label">Cash Conversion Cycle</div>
+                            <div class="output-value" id="wc-ccc">56.0 days</div>
+                        </div>
+                    </div>
+
+                    <div class="formula-box" id="wc-formula">
+                        DSO = (AR / Revenue) × 365<br>
+                        DIO = (Inventory / COGS) × 365<br>
+                        DPO = (AP / COGS) × 365<br>
+                        CCC = DSO + DIO - DPO
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+
+        function formatCurrency(num, decimals = 0) {
+            if (Math.abs(num) >= 1000000) {
+                return '$' + (num / 1000000).toFixed(1) + 'M';
+            } else if (Math.abs(num) >= 1000) {
+                return '$' + num.toLocaleString('en-US', { maximumFractionDigits: decimals });
+            }
+            return '$' + num.toFixed(decimals);
+        }
+
+        function formatPercent(num, decimals = 1) {
+            return num.toFixed(decimals) + '%';
+        }
+
+        function formatMultiple(num, decimals = 1) {
+            return num.toFixed(decimals) + 'x';
+        }
+
+        function toggleFormula(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('visible');
+        }
+
+        // ============================================
+        // TVM CALCULATORS
+        // ============================================
+
+        function calcPV() {
+            const fv = parseFloat(document.getElementById('pv-fv').value) || 0;
+            const rate = parseFloat(document.getElementById('pv-rate').value) / 100 || 0;
+            const periods = parseFloat(document.getElementById('pv-periods').value) || 0;
+            const compound = parseFloat(document.getElementById('pv-compound').value) || 1;
+
+            const periodicRate = rate / compound;
+            const totalPeriods = periods * compound;
+            const pv = fv / Math.pow(1 + periodicRate, totalPeriods);
+            const discount = fv - pv;
+
+            document.getElementById('pv-result').textContent = formatCurrency(pv, 2);
+            document.getElementById('pv-discount').textContent = 'Discount: ' + formatCurrency(discount, 2);
+        }
+
+        function calcFV() {
+            const pv = parseFloat(document.getElementById('fv-pv').value) || 0;
+            const rate = parseFloat(document.getElementById('fv-rate').value) / 100 || 0;
+            const periods = parseFloat(document.getElementById('fv-periods').value) || 0;
+            const compound = parseFloat(document.getElementById('fv-compound').value) || 1;
+
+            const periodicRate = rate / compound;
+            const totalPeriods = periods * compound;
+            const fv = pv * Math.pow(1 + periodicRate, totalPeriods);
+            const growth = fv - pv;
+
+            document.getElementById('fv-result').textContent = formatCurrency(fv, 2);
+            document.getElementById('fv-growth').textContent = 'Growth: ' + formatCurrency(growth, 2);
+        }
+
+        function calcAnnuityPV() {
+            const pmt = parseFloat(document.getElementById('ann-pv-pmt').value) || 0;
+            const rate = parseFloat(document.getElementById('ann-pv-rate').value) / 100 || 0;
+            const n = parseFloat(document.getElementById('ann-pv-n').value) || 0;
+            const type = document.getElementById('ann-pv-type').value;
+
+            if (rate === 0) {
+                document.getElementById('ann-pv-result').textContent = formatCurrency(pmt * n, 2);
+                document.getElementById('ann-pv-total').textContent = 'Total Payments: ' + formatCurrency(pmt * n, 2);
+                return;
+            }
+
+            let pv = pmt * ((1 - Math.pow(1 + rate, -n)) / rate);
+            if (type === 'due') {
+                pv = pv * (1 + rate);
+            }
+            const total = pmt * n;
+
+            document.getElementById('ann-pv-result').textContent = formatCurrency(pv, 2);
+            document.getElementById('ann-pv-total').textContent = 'Total Payments: ' + formatCurrency(total, 2);
+        }
+
+        function calcLoan() {
+            const principal = parseFloat(document.getElementById('loan-principal').value) || 0;
+            const annualRate = parseFloat(document.getElementById('loan-rate').value) / 100 || 0;
+            const years = parseFloat(document.getElementById('loan-years').value) || 0;
+            const freq = parseFloat(document.getElementById('loan-freq').value) || 12;
+
+            const periodicRate = annualRate / freq;
+            const totalPayments = years * freq;
+
+            if (periodicRate === 0) {
+                const pmt = principal / totalPayments;
+                document.getElementById('loan-payment').textContent = formatCurrency(pmt, 2);
+                document.getElementById('loan-total').textContent = 'Total Interest: $0.00';
+                return;
+            }
+
+            const pmt = principal * (periodicRate * Math.pow(1 + periodicRate, totalPayments)) /
+                        (Math.pow(1 + periodicRate, totalPayments) - 1);
+            const totalPaid = pmt * totalPayments;
+            const totalInterest = totalPaid - principal;
+
+            document.getElementById('loan-payment').textContent = formatCurrency(pmt, 2);
+            document.getElementById('loan-total').textContent = 'Total Interest: ' + formatCurrency(totalInterest, 2);
+        }
+
+        // ============================================
+        // BREAK-EVEN CALCULATOR
+        // ============================================
+
+        let breakevenChart = null;
+
+        function calcBreakeven() {
+            const price = parseFloat(document.getElementById('be-price').value) || 0;
+            const vc = parseFloat(document.getElementById('be-vc').value) || 0;
+            const fc = parseFloat(document.getElementById('be-fc').value) || 0;
+            const target = parseFloat(document.getElementById('be-target').value) || 0;
+
+            const cm = price - vc;
+            const cmRatio = price > 0 ? cm / price : 0;
+            const beUnits = cm > 0 ? fc / cm : 0;
+            const beRevenue = cmRatio > 0 ? fc / cmRatio : 0;
+            const targetUnits = cm > 0 ? (fc + target) / cm : 0;
+
+            document.getElementById('be-cm').textContent = formatCurrency(cm, 2);
+            document.getElementById('be-cm-pct').textContent = formatPercent(cmRatio * 100, 1) + ' of price';
+            document.getElementById('be-units').textContent = Math.ceil(beUnits).toLocaleString();
+            document.getElementById('be-revenue').textContent = formatCurrency(beRevenue);
+            document.getElementById('be-target-units').textContent = Math.ceil(targetUnits).toLocaleString();
+
+            // Update chart
+            updateBreakevenChart(price, vc, fc, beUnits, targetUnits);
+        }
+
+        function updateBreakevenChart(price, vc, fc, beUnits, targetUnits) {
+            const ctx = document.getElementById('breakeven-chart').getContext('2d');
+
+            const maxUnits = Math.max(beUnits * 1.5, targetUnits * 1.2);
+            const units = [];
+            const revenue = [];
+            const totalCost = [];
+
+            for (let i = 0; i <= 10; i++) {
+                const u = (maxUnits / 10) * i;
+                units.push(Math.round(u));
+                revenue.push(u * price);
+                totalCost.push(fc + u * vc);
+            }
+
+            if (breakevenChart) {
+                breakevenChart.destroy();
+            }
+
+            breakevenChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: units,
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: revenue,
+                            borderColor: '#FFCB05',
+                            backgroundColor: 'rgba(255, 203, 5, 0.1)',
+                            tension: 0,
+                            fill: false
+                        },
+                        {
+                            label: 'Total Cost',
+                            data: totalCost,
+                            borderColor: '#e63757',
+                            backgroundColor: 'rgba(230, 55, 87, 0.1)',
+                            tension: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#a0a0b0' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Units', color: '#a0a0b0' },
+                            ticks: { color: '#606070' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Dollars', color: '#a0a0b0' },
+                            ticks: {
+                                color: '#606070',
+                                callback: function(value) { return '$' + value.toLocaleString(); }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // WACC CALCULATOR
+        // ============================================
+
+        function calcWACC() {
+            const rf = parseFloat(document.getElementById('wacc-rf').value) / 100 || 0;
+            const rm = parseFloat(document.getElementById('wacc-rm').value) / 100 || 0;
+            const beta = parseFloat(document.getElementById('wacc-beta').value) || 0;
+            const we = parseFloat(document.getElementById('wacc-we').value) / 100 || 0;
+            const rd = parseFloat(document.getElementById('wacc-rd').value) / 100 || 0;
+            const tax = parseFloat(document.getElementById('wacc-tax').value) / 100 || 0;
+            const wd = parseFloat(document.getElementById('wacc-wd').value) / 100 || 0;
+
+            const ke = rf + beta * (rm - rf);
+            const kdAfterTax = rd * (1 - tax);
+            const wacc = we * ke + wd * kdAfterTax;
+
+            document.getElementById('wacc-ke').textContent = formatPercent(ke * 100, 2);
+            document.getElementById('wacc-kd').textContent = formatPercent(kdAfterTax * 100, 2);
+            document.getElementById('wacc-result').textContent = formatPercent(wacc * 100, 2);
+        }
+
+        // ============================================
+        // DCF MODEL
+        // ============================================
+
+        function calcDCF() {
+            const revenue0 = parseFloat(document.getElementById('dcf-revenue').value) || 0;
+            const growth = parseFloat(document.getElementById('dcf-growth').value) / 100 || 0;
+            const ebitdaMargin = parseFloat(document.getElementById('dcf-ebitda-margin').value) / 100 || 0;
+            const daPercent = parseFloat(document.getElementById('dcf-da').value) / 100 || 0;
+            const capexPercent = parseFloat(document.getElementById('dcf-capex').value) / 100 || 0;
+            const nwcPercent = parseFloat(document.getElementById('dcf-nwc').value) / 100 || 0;
+            const taxRate = parseFloat(document.getElementById('dcf-tax').value) / 100 || 0;
+            const wacc = parseFloat(document.getElementById('dcf-wacc').value) / 100 || 0;
+            const terminalGrowth = parseFloat(document.getElementById('dcf-tg').value) / 100 || 0;
+            const years = parseInt(document.getElementById('dcf-years').value) || 5;
+
+            // Build projections
+            const revenues = [revenue0];
+            for (let i = 1; i <= years; i++) {
+                revenues.push(revenues[i - 1] * (1 + growth));
+            }
+
+            const ebitda = revenues.map(r => r * ebitdaMargin);
+            const da = revenues.map(r => r * daPercent);
+            const ebit = ebitda.map((e, i) => e - da[i]);
+            const taxes = ebit.map(e => Math.max(0, e * taxRate));
+            const nopat = ebit.map((e, i) => e - taxes[i]);
+
+            const capex = revenues.map(r => r * capexPercent);
+            const nwc = revenues.map(r => r * nwcPercent);
+            const deltaNWC = nwc.map((n, i) => i === 0 ? 0 : n - nwc[i - 1]);
+
+            const fcf = nopat.map((n, i) => n + da[i] - capex[i] - deltaNWC[i]);
+
+            // Discount FCFs (skip year 0)
+            let pvFCF = 0;
+            const discountedFCF = [];
+            for (let i = 1; i <= years; i++) {
+                const df = Math.pow(1 + wacc, i);
+                const pv = fcf[i] / df;
+                discountedFCF.push(pv);
+                pvFCF += pv;
+            }
+
+            // Terminal value
+            const terminalFCF = fcf[years] * (1 + terminalGrowth);
+            const terminalValue = terminalFCF / (wacc - terminalGrowth);
+            const pvTerminal = terminalValue / Math.pow(1 + wacc, years);
+
+            const enterpriseValue = pvFCF + pvTerminal;
+            const evRevenue = enterpriseValue / revenue0;
+
+            // Update display
+            document.getElementById('dcf-pv-fcf').textContent = '$' + pvFCF.toFixed(1) + 'M';
+            document.getElementById('dcf-pv-tv').textContent = '$' + pvTerminal.toFixed(1) + 'M';
+            document.getElementById('dcf-ev').textContent = '$' + enterpriseValue.toFixed(1) + 'M';
+            document.getElementById('dcf-ev-multiple').textContent = evRevenue.toFixed(1) + 'x Revenue';
+
+            // Build FCF table
+            buildDCFTable(years, revenues, ebitda, da, nopat, capex, deltaNWC, fcf, discountedFCF);
+
+            // Build sensitivity table
+            buildSensitivityTable(fcf[years], wacc, terminalGrowth, pvFCF, years);
+        }
+
+        function buildDCFTable(years, revenues, ebitda, da, nopat, capex, deltaNWC, fcf, discountedFCF) {
+            // Header
+            let headerHTML = '<th>Metric</th>';
+            for (let i = 1; i <= years; i++) {
+                headerHTML += `<th>Year ${i}</th>`;
+            }
+            document.getElementById('dcf-header-row').innerHTML = headerHTML;
+
+            // Body
+            const rows = [
+                { label: 'Revenue', data: revenues.slice(1), format: 'currency' },
+                { label: 'EBITDA', data: ebitda.slice(1), format: 'currency' },
+                { label: 'D&A', data: da.slice(1), format: 'currency' },
+                { label: 'NOPAT', data: nopat.slice(1), format: 'currency' },
+                { label: 'CapEx', data: capex.slice(1).map(c => -c), format: 'currency' },
+                { label: 'Δ NWC', data: deltaNWC.slice(1).map(d => -d), format: 'currency' },
+                { label: 'FCF', data: fcf.slice(1), format: 'currency', highlight: true },
+                { label: 'PV of FCF', data: discountedFCF, format: 'currency', highlight: true }
+            ];
+
+            let bodyHTML = '';
+            rows.forEach(row => {
+                bodyHTML += `<tr${row.highlight ? ' class="highlight"' : ''}>`;
+                bodyHTML += `<td>${row.label}</td>`;
+                row.data.forEach(val => {
+                    const formatted = row.format === 'currency' ? '$' + val.toFixed(1) + 'M' : val.toFixed(1);
+                    bodyHTML += `<td>${formatted}</td>`;
+                });
+                bodyHTML += '</tr>';
+            });
+            document.getElementById('dcf-fcf-body').innerHTML = bodyHTML;
+        }
+
+        function buildSensitivityTable(finalFCF, baseWACC, baseTG, basePVFCF, years) {
+            const waccRange = [-0.02, -0.01, 0, 0.01, 0.02];
+            const tgRange = [-0.01, -0.005, 0, 0.005, 0.01];
+
+            let html = '<table class="sensitivity-table">';
+            html += '<tr><th>WACC \\ TG</th>';
+            tgRange.forEach(tg => {
+                html += `<th>${formatPercent((baseTG + tg) * 100, 1)}</th>`;
+            });
+            html += '</tr>';
+
+            waccRange.forEach(w => {
+                const wacc = baseWACC + w;
+                html += `<tr><td style="font-weight:bold;">${formatPercent(wacc * 100, 1)}</td>`;
+
+                tgRange.forEach(tg => {
+                    const termGrowth = baseTG + tg;
+                    const termFCF = finalFCF * (1 + termGrowth);
+                    const tv = termFCF / (wacc - termGrowth);
+                    const pvTV = tv / Math.pow(1 + wacc, years);
+                    const ev = basePVFCF + pvTV;
+
+                    const isBase = Math.abs(w) < 0.001 && Math.abs(tg) < 0.001;
+                    html += `<td class="${isBase ? 'base-case' : ''}">$${ev.toFixed(0)}M</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</table>';
+
+            document.getElementById('dcf-sensitivity-container').innerHTML = html;
+        }
+
+        // ============================================
+        // COMPS ANALYSIS
+        // ============================================
+
+        function calcComps() {
+            const rows = document.querySelectorAll('#comps-body tr');
+            const evRevMultiples = [];
+            const evEbitdaMultiples = [];
+
+            rows.forEach(row => {
+                const price = parseFloat(row.querySelector('.comp-price').value) || 0;
+                const shares = parseFloat(row.querySelector('.comp-shares').value) || 0;
+                const debt = parseFloat(row.querySelector('.comp-debt').value) || 0;
+                const cash = parseFloat(row.querySelector('.comp-cash').value) || 0;
+                const revenue = parseFloat(row.querySelector('.comp-revenue').value) || 0;
+                const ebitda = parseFloat(row.querySelector('.comp-ebitda').value) || 0;
+
+                const mcap = price * shares;
+                const ev = mcap + debt - cash;
+                const evRev = revenue > 0 ? ev / revenue : 0;
+                const evEbitda = ebitda > 0 ? ev / ebitda : 0;
+
+                row.querySelector('.comp-mcap').textContent = '$' + mcap.toLocaleString();
+                row.querySelector('.comp-ev').textContent = '$' + ev.toLocaleString();
+                row.querySelector('.comp-ev-rev').textContent = formatMultiple(evRev);
+                row.querySelector('.comp-ev-ebitda').textContent = formatMultiple(evEbitda);
+
+                if (evRev > 0) evRevMultiples.push(evRev);
+                if (evEbitda > 0) evEbitdaMultiples.push(evEbitda);
+            });
+
+            // Calculate medians
+            const medianEvRev = median(evRevMultiples);
+            const medianEvEbitda = median(evEbitdaMultiples);
+
+            document.getElementById('comps-median-ev-rev').textContent = formatMultiple(medianEvRev);
+            document.getElementById('comps-median-ev-ebitda').textContent = formatMultiple(medianEvEbitda);
+
+            // Calculate target implied values
+            const targetRevenue = parseFloat(document.getElementById('target-revenue').value) || 0;
+            const targetEbitda = parseFloat(document.getElementById('target-ebitda').value) || 0;
+
+            document.getElementById('target-ev-rev').textContent = '$' + (targetRevenue * medianEvRev).toFixed(0) + 'M';
+            document.getElementById('target-ev-ebitda').textContent = '$' + (targetEbitda * medianEvEbitda).toFixed(0) + 'M';
+        }
+
+        function median(arr) {
+            if (arr.length === 0) return 0;
+            const sorted = [...arr].sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        }
+
+        // ============================================
+        // LBO MODEL
+        // ============================================
+
+        function calcLBO() {
+            const ebitda0 = parseFloat(document.getElementById('lbo-ebitda').value) || 0;
+            const entryMult = parseFloat(document.getElementById('lbo-entry-mult').value) || 0;
+            const leverage = parseFloat(document.getElementById('lbo-leverage').value) || 0;
+            const rate = parseFloat(document.getElementById('lbo-rate').value) / 100 || 0;
+            const growth = parseFloat(document.getElementById('lbo-growth').value) / 100 || 0;
+            const years = parseInt(document.getElementById('lbo-years').value) || 5;
+            const exitMult = parseFloat(document.getElementById('lbo-exit-mult').value) || 0;
+            const fcfConversion = parseFloat(document.getElementById('lbo-fcf').value) / 100 || 0;
+
+            // Entry
+            const entryEV = ebitda0 * entryMult;
+            const entryDebt = ebitda0 * leverage;
+            const entryEquity = entryEV - entryDebt;
+
+            // Project EBITDA and FCF, pay down debt
+            let ebitda = ebitda0;
+            let debt = entryDebt;
+            for (let i = 0; i < years; i++) {
+                ebitda = ebitda * (1 + growth);
+                const fcf = ebitda * fcfConversion;
+                const interest = debt * rate;
+                const debtPaydown = Math.max(0, fcf - interest);
+                debt = Math.max(0, debt - debtPaydown);
+            }
+
+            // Exit
+            const exitEV = ebitda * exitMult;
+            const exitEquity = exitEV - debt;
+
+            // Returns
+            const mom = exitEquity / entryEquity;
+            const irr = Math.pow(mom, 1 / years) - 1;
+
+            document.getElementById('lbo-entry-ev').textContent = '$' + entryEV.toFixed(0) + 'M';
+            document.getElementById('lbo-equity').textContent = '$' + entryEquity.toFixed(0) + 'M';
+            document.getElementById('lbo-exit-ev').textContent = '$' + exitEV.toFixed(0) + 'M';
+            document.getElementById('lbo-exit-equity').textContent = '$' + exitEquity.toFixed(0) + 'M';
+            document.getElementById('lbo-irr').textContent = formatPercent(irr * 100, 1);
+            document.getElementById('lbo-mom').textContent = formatMultiple(mom);
+        }
+
+        // ============================================
+        // THREE-STATEMENT MODEL
+        // ============================================
+
+        function calcThreeStatement() {
+            const revenue0 = parseFloat(document.getElementById('ts-revenue').value) || 0;
+            const growth = parseFloat(document.getElementById('ts-growth').value) / 100 || 0;
+            const gm = parseFloat(document.getElementById('ts-gm').value) / 100 || 0;
+            const sgaPercent = parseFloat(document.getElementById('ts-sga').value) / 100 || 0;
+
+            const taxRate = 0.25;
+            const daPercent = 0.03;
+
+            // Build projections
+            const revenues = [];
+            const grossProfit = [];
+            const sga = [];
+            const ebitda = [];
+            const da = [];
+            const ebit = [];
+            const taxes = [];
+            const netIncome = [];
+
+            let rev = revenue0;
+            for (let i = 0; i < 5; i++) {
+                rev = i === 0 ? rev : rev * (1 + growth);
+                revenues.push(rev);
+                grossProfit.push(rev * gm);
+                sga.push(rev * sgaPercent);
+                ebitda.push(grossProfit[i] - sga[i]);
+                da.push(rev * daPercent);
+                ebit.push(ebitda[i] - da[i]);
+                taxes.push(Math.max(0, ebit[i] * taxRate));
+                netIncome.push(ebit[i] - taxes[i]);
+            }
+
+            // Build table
+            const rows = [
+                { label: 'Revenue', data: revenues },
+                { label: 'Gross Profit', data: grossProfit },
+                { label: 'SG&A', data: sga.map(s => -s) },
+                { label: 'EBITDA', data: ebitda, highlight: true },
+                { label: 'D&A', data: da.map(d => -d) },
+                { label: 'EBIT', data: ebit },
+                { label: 'Taxes', data: taxes.map(t => -t) },
+                { label: 'Net Income', data: netIncome, highlight: true }
+            ];
+
+            let bodyHTML = '';
+            rows.forEach(row => {
+                bodyHTML += `<tr${row.highlight ? ' class="highlight"' : ''}>`;
+                bodyHTML += `<td>${row.label}</td>`;
+                row.data.forEach(val => {
+                    bodyHTML += `<td>$${val.toFixed(1)}M</td>`;
+                });
+                bodyHTML += '</tr>';
+            });
+            document.getElementById('ts-is-body').innerHTML = bodyHTML;
+
+            // Summary metrics
+            document.getElementById('ts-yr5-rev').textContent = '$' + revenues[4].toFixed(1) + 'M';
+            document.getElementById('ts-yr5-ni').textContent = '$' + netIncome[4].toFixed(1) + 'M';
+            document.getElementById('ts-yr5-margin').textContent = formatPercent((netIncome[4] / revenues[4]) * 100, 1);
+        }
+
+        // ============================================
+        // WORKING CAPITAL
+        // ============================================
+
+        function calcWorkingCapital() {
+            const revenue = parseFloat(document.getElementById('wc-revenue').value) || 0;
+            const cogs = parseFloat(document.getElementById('wc-cogs').value) || 0;
+            const ar = parseFloat(document.getElementById('wc-ar').value) || 0;
+            const inv = parseFloat(document.getElementById('wc-inv').value) || 0;
+            const ap = parseFloat(document.getElementById('wc-ap').value) || 0;
+
+            const dso = revenue > 0 ? (ar / revenue) * 365 : 0;
+            const dio = cogs > 0 ? (inv / cogs) * 365 : 0;
+            const dpo = cogs > 0 ? (ap / cogs) * 365 : 0;
+            const ccc = dso + dio - dpo;
+
+            document.getElementById('wc-dso').textContent = dso.toFixed(1) + ' days';
+            document.getElementById('wc-dio').textContent = dio.toFixed(1) + ' days';
+            document.getElementById('wc-dpo').textContent = dpo.toFixed(1) + ' days';
+            document.getElementById('wc-ccc').textContent = ccc.toFixed(1) + ' days';
+        }
+
+        // ============================================
+        // NAVIGATION
+        // ============================================
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+            const shortcuts = {
+                '1': '#tvm',
+                '2': '#breakeven',
+                '3': '#wacc',
+                '4': '#dcf',
+                '5': '#comps',
+                '6': '#lbo',
+                '7': '#three-statement',
+                '8': '#working-capital'
+            };
+
+            if (shortcuts[e.key]) {
+                document.querySelector(shortcuts[e.key]).scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // Active nav highlighting
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === '#' + current) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // ============================================
+        // INITIALIZE
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            calcPV();
+            calcFV();
+            calcAnnuityPV();
+            calcLoan();
+            calcBreakeven();
+            calcWACC();
+            calcDCF();
+            calcComps();
+            calcLBO();
+            calcThreeStatement();
+            calcWorkingCapital();
+        });
+    </script>
+</body>
+</html>
