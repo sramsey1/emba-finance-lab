@@ -1783,12 +1783,12 @@
             buildSensitivityTable(fcf[years], wacc, terminalGrowth, pvFCF, years);
             // Build waterfall chart for Year 1
             if (typeof buildDCFWaterfall === "function") {
-                const yr1Rev = baseRevenue * (1 + revGrowth);
+                const yr1Rev = revenue0 * (1 + growth);
                 const yr1EBITDA = yr1Rev * ebitdaMargin;
-                const yr1DA = yr1Rev * da;
+                const yr1DA = yr1Rev * daPercent;
                 const yr1NOPAT = (yr1EBITDA - yr1DA) * (1 - taxRate);
-                const yr1CapEx = -yr1Rev * capex;
-                const yr1NWC = -yr1Rev * nwc;
+                const yr1CapEx = -yr1Rev * capexPercent;
+                const yr1NWC = -yr1Rev * nwcPercent;
                 buildDCFWaterfall(yr1Rev, yr1EBITDA, yr1DA, yr1NOPAT, yr1CapEx, yr1NWC, fcf[1]);
             }
 
@@ -2162,9 +2162,9 @@
             const accretion = (pfEPS - acqEPS) / acqEPS;
 
             document.getElementById('ma-offer-price').textContent = '$' + offerPrice.toFixed(2);
-            document.getElementById('ma-deal-value').textContent = formatCurrency(dealValue);
+            document.getElementById('ma-deal-value').textContent = formatCurrency(dealValue) + 'M';
             document.getElementById('ma-new-shares').textContent = newShares.toFixed(1) + 'M';
-            document.getElementById('ma-cash-needed').textContent = formatCurrency(cashPortion);
+            document.getElementById('ma-cash-needed').textContent = formatCurrency(cashPortion) + 'M';
             document.getElementById('ma-acq-eps').textContent = '$' + acqEPS.toFixed(2);
             document.getElementById('ma-pf-eps').textContent = '$' + pfEPS.toFixed(2);
 
@@ -2179,11 +2179,11 @@
             // Build summary table
             const tbody = document.getElementById('ma-table-body');
             const rows = [
-                ['Net Income', formatCurrency(acqNI), formatCurrency(pfNI), formatCurrency(pfNI - acqNI)],
+                ['Net Income', formatCurrency(acqNI) + 'M', formatCurrency(pfNI) + 'M', formatCurrency(pfNI - acqNI) + 'M'],
                 ['Shares Outstanding', acqShares.toFixed(1) + 'M', pfShares.toFixed(1) + 'M', '+' + newShares.toFixed(1) + 'M'],
                 ['EPS', '$' + acqEPS.toFixed(2), '$' + pfEPS.toFixed(2), (isAccretive ? '+' : '') + '$' + (pfEPS - acqEPS).toFixed(2)],
-                ['Synergies (after-tax)', '-', formatCurrency(afterTaxSynergies), formatCurrency(afterTaxSynergies)],
-                ['Interest Expense (after-tax)', '-', formatCurrency(afterTaxInterest), '-' + formatCurrency(afterTaxInterest)],
+                ['Synergies (after-tax)', '-', formatCurrency(afterTaxSynergies) + 'M', formatCurrency(afterTaxSynergies) + 'M'],
+                ['Interest Expense (after-tax)', '-', formatCurrency(afterTaxInterest) + 'M', '-' + formatCurrency(afterTaxInterest) + 'M'],
             ];
             tbody.innerHTML = rows.map(r => {
                 const changeVal = r[3];
